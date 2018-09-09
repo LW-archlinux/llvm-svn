@@ -243,7 +243,7 @@ package_llvm-svn() {
     provides=('llvm')
     conflicts=('llvm')
 
-#    cd "${srcdir}/_build"
+    cd "${srcdir}/_build"
 
     # Disable automatic installation of components that go into subpackages
     sed -i '/\(clang\|lld\|lldb\)\/cmake_install.cmake/d' tools/cmake_install.cmake

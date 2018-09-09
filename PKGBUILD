@@ -24,7 +24,7 @@ pkgname=(
 )
 _pkgname='llvm'
 
-pkgver=3.8.0svn_r247138
+pkgver=8.0.0svn_r341758
 pkgrel=1
 
 arch=('i686' 'x86_64')
@@ -44,6 +44,7 @@ makedepends=(
     'subversion'
     'swig'
     'ninja'
+    'opencl-headers'
 )
 
 # this is always the latest svn so debug info can be useful

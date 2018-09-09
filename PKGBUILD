@@ -121,10 +121,10 @@ _install_python_bindings() {
 _install_licenses() {
     find "${1}" \
         \( \
-            -path "${srcdir}/${_pkgname}/tools/lld" -o \
-            -path "${srcdir}/${_pkgname}/tools/clang" -o \
-            -path "${srcdir}/${_pkgname}/tools/lldb" -o \
-            -path "${srcdir}/${_pkgname}/projects/compiler-rt" \
+            -path "${srcdir}/lld" -o \
+            -path "${srcdir}/clang" -o \
+            -path "${srcdir}/lldb" -o \
+            -path "${srcdir}/compiler-rt" \
         \) -prune -o \
         \( \
             -iname 'license*' -o \
@@ -215,7 +215,7 @@ build() {
         -DLLVM_EXTERNAL_COMPILER_RT_SOURCE_DIR="$srcdir"/compiler-rt \
         -DLLVM_EXTERNAL_LLD_SOURCE_DIR="$srcdir"/lld \
         -DLLVM_EXTERNAL_LLDB_SOURCE_DIR="$srcdir"/lldb  \
-        -DLLVM_EXTERNAL_POLLY_SOURCE_DIR="$srcdir"/polly
+        -DLLVM_EXTERNAL_POLLY_SOURCE_DIR="$srcdir"/polly \
         "../${_pkgname}"
 
     ninja all

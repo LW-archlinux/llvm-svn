@@ -24,7 +24,7 @@ pkgname=(
 )
 _pkgname='llvm'
 
-pkgver=8.0.0svn_r341762
+pkgver=8.0.0svn_r341763
 pkgrel=1
 
 arch=('i686' 'x86_64')
@@ -221,8 +221,7 @@ build() {
         -DLLVM_EXTERNAL_POLLY_SOURCE_DIR="$srcdir"/polly \
         "$srcdir"/$_pkgname
 
-    ninja -C "$srcdir"/_build all
-    ninja -C "$srcdir"/_build ocaml_doc
+    ninja -C "$srcdir"/_build all ocaml_doc
 }
 
 check() {
@@ -246,19 +245,20 @@ package_llvm-svn() {
     cd "${srcdir}/_build"
 
     # Disable automatic installation of components that go into subpackages
-    sed -i '/\(clang\|lld\|lldb\)\/cmake_install.cmake/d' tools/cmake_install.cmake
+#    sed -i '/\(clang\|lld\|lldb\)\/cmake_install.cmake/d' tools/cmake_install.cmake
 
     DESTDIR="${pkgdir}" ninja -C "$srcdir"/_build install
 
-    # The runtime libraries get installed in llvm-libs-svn
-    rm -f "${pkgdir}"/usr/lib/lib{LLVM,LTO}{,-*}.so{,.*}
-    mv -f "${pkgdir}"/usr/lib/{BugpointPasses,LLVMgold,LLVMHello}.so "${srcdir}/"
+    mkdir -p $srcdir/fakeinstall/{llvm-libs-svn/usr/lib,clang/usr/lib,ocaml/usr/{lib/ocaml,share/doc/llvm}}
+    # The runtime libraries go into llvm-libs-svn
+    mv "$pkgdir"/usr/lib/lib{LLVM,LTO}*.so* "$srcdir"/fakeinstall/lvm-libs-svn/usr/lib
+    mv "${pkgdir}"/usr/lib/{BugpointPasses,LLVMgold,LLVMHello}.so "$srcdir"/fakeinstall/llvm-libs-svn/usr/lib
 
     # Clang libraries and OCaml bindings go to separate packages
     rm -rf "${srcdir}"/{clang,ocaml.{doc,lib}}
-    mv "${pkgdir}/usr/lib/clang" "${srcdir}/clang"
-    mv "${pkgdir}/usr/lib/ocaml" "${srcdir}/ocaml.lib"
-    mv "${pkgdir}/usr/share/doc/llvm/ocaml-html" "${srcdir}/ocaml.doc"
+    mv "${pkgdir}"/usr/lib/clang/ "${srcdir}"/fakeinstall/clang/usr/lib/
+    mv "${pkgdir}/usr/lib/ocaml" "${srcdir}"/fakeinstall/ocaml/usr/lib/
+    mv "${pkgdir}"/usr/share/doc/llvm/ocaml-html "${srcdir}"/ocaml/usr/share/doc/llvm/
 
     if [[ "${CARCH}" == "x86_64" ]]; then
         # Needed for multilib (https://bugs.archlinux.org/task/29951)
@@ -286,14 +286,9 @@ package_llvm-libs-svn() {
     provides=('llvm-libs')
     conflicts=('llvm-libs')
 
-    install -d "$pkgdir/usr/lib"
-    cp -P \
-        "$srcdir"/lib{LLVM,LTO}*.so* \
-        "$srcdir"/LLVMgold.so \
-        "$pkgdir/usr/lib/"
 
     # Moved from the llvm-svn package here
-    mv "${srcdir}"/{BugpointPasses,LLVMHello}.so "${pkgdir}/usr/lib/"
+    mv "${srcdir}"/fakeinstall/llvm-libs-svn/usr/lib/* "${pkgdir}"/usr/lib/
 
     # Ref: https://llvm.org/docs/GoldPlugin.html
     install -m755 -d "${pkgdir}/usr/lib/bfd-plugins"
@@ -327,8 +322,8 @@ package_llvm-ocaml-svn() {
 
     install -m755 -d "${pkgdir}/usr/lib"
     install -m755 -d "${pkgdir}/usr/share/doc/llvm"
-    cp -a "${srcdir}/ocaml.lib" "${pkgdir}/usr/lib/ocaml"
-    cp -a "${srcdir}/ocaml.doc" "${pkgdir}/usr/share/doc/llvm/ocaml-html"
+    mv "${srcdir}"/fakeinstall/ocaml/usr/lib/* "${pkgdir}"/usr/lib/ocaml/
+    mv "${srcdir}"/fakeinstall/ocaml/usr/share/doc/* "${pkgdir}"/usr/share/doc/llvm/ocaml-html/
 
     _install_licenses "${srcdir}/llvm"
 }

@@ -159,13 +159,14 @@ prepare() {
     cd "${srcdir}/${_pkgname}"
 
     # Anything added here and packaged separately should be pruned in _install_licenses() above.
-    svn export --force "${srcdir}/clang" tools/clang
-    svn export --force "${srcdir}/clang-tools-extra" tools/clang/tools/extra
-    svn export --force "${srcdir}/compiler-rt" projects/compiler-rt
-    svn export --force "${srcdir}/lld" tools/lld
-    svn export --force "${srcdir}/lldb" tools/lldb
-    svn export --force "${srcdir}/polly" tools/polly
+#    svn export --force "${srcdir}/clang" tools/clang
+#    svn export --force "${srcdir}/clang-tools-extra" tools/clang/tools/extra
+#    svn export --force "${srcdir}/compiler-rt" projects/compiler-rt
+#    svn export --force "${srcdir}/lld" tools/lld
+#    svn export --force "${srcdir}/lldb" tools/lldb
+#    svn export --force "${srcdir}/polly" tools/polly
 
+# svn export is not needed when using cmake settings -DLLVM_EXTERNAL_foo_SOURCE_DIR= "$srcdir"/foo
     mkdir -p "${srcdir}/build"
 }
 
@@ -209,6 +210,12 @@ build() {
         -DLLVM_BUILD_LLVM_DYLIB:BOOL=ON \
         -DLLVM_LINK_LLVM_DYLIB:BOOL=ON \
         -DLLVM_BINUTILS_INCDIR:PATH=/usr/include \
+        -DLLVM_EXTERNAL_CLANG_SOURCE_DIR="$srcdir"/clang \
+        -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR="$srcdir"/clang-tools-extra \
+        -DLLVM_EXTERNAL_COMPILER_RT_SOURCE_DIR="$srcdir"/compiler-rt \
+        -DLLVM_EXTERNAL_LLD_SOURCE_DIR="$srcdir"/lld \
+        -DLLVM_EXTERNAL_LLDB_SOURCE_DIR="$srcdir"/lldb  \
+        -DLLVM_EXTERNAL_POLLY_SOURCE_DIR="$srcdir"/polly
         "../${_pkgname}"
 
     ninja all

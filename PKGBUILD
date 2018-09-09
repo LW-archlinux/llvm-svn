@@ -24,7 +24,7 @@ pkgname=(
 )
 _pkgname='llvm'
 
-pkgver=8.0.0svn_r341761
+pkgver=8.0.0svn_r341762
 pkgrel=1
 
 arch=('i686' 'x86_64')
@@ -192,9 +192,10 @@ build() {
     # LLVM_BUILD_LLVM_DYLIB: Build the dynamic runtime libraries (e.g. libLLVM.so).
     # LLVM_LINK_LLVM_DYLIB:  Link our own tools against the libLLVM dynamic library, too.
     # LLVM_BINUTILS_INCDIR:  Set to binutils' plugin-api.h location in order to build LLVMgold.
+    cd _build
     cmake -G Ninja \
-        -DCMAKE_SOURCE_DIR="$srcdir/$_pkgname" \
-        -DCMAKE_BINARY_DIR="$srcdir"/_build
+        -DCMAKE_SOURCE_DIR="$srcdir"/$_pkgname \
+        -DCMAKE_BINARY_DIR="$srcdir"/_build \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DCMAKE_INSTALL_PREFIX:PATH=/usr \
         -DLLVM_APPEND_VC_REV:BOOL=ON \
@@ -218,6 +219,7 @@ build() {
         -DLLVM_EXTERNAL_LLD_SOURCE_DIR="$srcdir"/lld \
         -DLLVM_EXTERNAL_LLDB_SOURCE_DIR="$srcdir"/lldb  \
         -DLLVM_EXTERNAL_POLLY_SOURCE_DIR="$srcdir"/polly \
+        "$srcdir"/$_pkgname
 
     ninja -C "$srcdir"/_build all
     ninja -C "$srcdir"/_build ocaml_doc

@@ -43,6 +43,7 @@ makedepends=(
     'python2-sphinx'
     'subversion'
     'swig'
+    'ninja'
 )
 
 # this is always the latest svn so debug info can be useful

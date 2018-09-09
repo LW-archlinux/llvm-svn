@@ -286,12 +286,14 @@ package_llvm-libs-svn() {
     provides=('llvm-libs')
     conflicts=('llvm-libs')
 
-    cd "${srcdir}/_build"
-
-    DESTDIR="${pkgdir}" ninja -C "$srcdir"/_build install-{LLVM,LTO} 
+    install -d "$pkgdir/usr/lib"
+    cp -P \
+        "$srcdir"/lib{LLVM,LTO}*.so* \
+        "$srcdir"/LLVMgold.so \
+        "$pkgdir/usr/lib/"
 
     # Moved from the llvm-svn package here
-    mv "${srcdir}"/{BugpointPasses,LLVMgold,LLVMHello}.so "${pkgdir}/usr/lib/"
+    mv "${srcdir}"/{BugpointPasses,LLVMHello}.so "${pkgdir}/usr/lib/"
 
     # Ref: https://llvm.org/docs/GoldPlugin.html
     install -m755 -d "${pkgdir}/usr/lib/bfd-plugins"

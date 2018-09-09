@@ -189,7 +189,7 @@ build() {
     # LLVM_BUILD_LLVM_DYLIB: Build the dynamic runtime libraries (e.g. libLLVM.so).
     # LLVM_LINK_LLVM_DYLIB:  Link our own tools against the libLLVM dynamic library, too.
     # LLVM_BINUTILS_INCDIR:  Set to binutils' plugin-api.h location in order to build LLVMgold.
-    cmake -G 'Unix Makefiles' \
+    cmake -G Ninja \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DCMAKE_INSTALL_PREFIX:PATH=/usr \
         -DLLVM_APPEND_VC_REV:BOOL=ON \
@@ -209,17 +209,17 @@ build() {
         -DLLVM_BINUTILS_INCDIR:PATH=/usr/include \
         "../${_pkgname}"
 
-    make
-    make ocaml_doc
+    ninja all
+    ninja ocaml_doc
 }
 
 check() {
     cd "${srcdir}/build"
     # Dirty fix for unittests failing because the shared lib is not in the library path.
     # Also, disable the LLVM tests on i686 as they seem to fail too often there.
-    [[ "${CARCH}" == "i686" ]] || LD_LIBRARY_PATH="${srcdir}/build/lib" make check
-    make check-clang
-    make check-polly
+    [[ "${CARCH}" == "i686" ]] || LD_LIBRARY_PATH="${srcdir}/build/lib" ninja check
+    ninja check-clang
+    ninja check-polly
 }
 
 package_llvm-svn() {
@@ -236,7 +236,7 @@ package_llvm-svn() {
     # Disable automatic installation of components that go into subpackages
     sed -i '/\(clang\|lld\|lldb\)\/cmake_install.cmake/d' tools/cmake_install.cmake
 
-    make DESTDIR="${pkgdir}" install
+    ninja DESTDIR="${pkgdir}" install
 
     # The runtime libraries get installed in llvm-libs-svn
     rm -f "${pkgdir}"/usr/lib/lib{LLVM,LTO}{,-*}.so{,.*}
@@ -276,7 +276,7 @@ package_llvm-libs-svn() {
 
     cd "${srcdir}/build"
 
-    make DESTDIR="${pkgdir}" install-{LLVM,LTO}
+    ninja DESTDIR="${pkgdir}" install-{LLVM,LTO}
 
     # Moved from the llvm-svn package here
     mv "${srcdir}"/{BugpointPasses,LLVMgold,LLVMHello}.so "${pkgdir}/usr/lib/"
@@ -331,7 +331,7 @@ package_lld-svn() {
 
     cd "${srcdir}/build/tools/lld"
 
-    make DESTDIR="${pkgdir}" install
+    ninja DESTDIR="${pkgdir}" install
 
     # Clean up documentation
     # TODO: This may at some point not be needed any more.
@@ -355,7 +355,7 @@ package_lldb-svn() {
 
     cd "${srcdir}/build/tools/lldb"
 
-    make DESTDIR="${pkgdir}" install
+    ninja DESTDIR="${pkgdir}" install
 
     # Clean up conflicting files
     # TODO: This should probably be discussed with upstream.
@@ -392,7 +392,7 @@ package_clang-svn() {
         "s|^\([[:blank:]]*include(\"${srcdir}/build/tools/clang/tools/extra/cmake_install.cmake\")\)$|#\1|" \
         tools/cmake_install.cmake
 
-    make DESTDIR="${pkgdir}" install
+    ninja DESTDIR="${pkgdir}" install
 
     # The Clang Static Analyzer is installed in a separate package
     # TODO: Probably there's more elegant way to achieve this.
@@ -490,7 +490,7 @@ package_clang-compiler-rt-svn() {
 
     cd "${srcdir}/build/projects/compiler-rt"
 
-    make DESTDIR="${pkgdir}" install
+    ninja DESTDIR="${pkgdir}" install
 
     _install_licenses "${srcdir}/compiler-rt"
 }
@@ -507,7 +507,7 @@ package_clang-tools-extra-svn() {
 
     cd "${srcdir}/build/tools/clang/tools/extra"
 
-    make DESTDIR="${pkgdir}" install
+    ninja DESTDIR="${pkgdir}" install
 
     _install_licenses "${srcdir}/clang-tools-extra"
 }
